@@ -1,4 +1,3 @@
-import { App, Editor, Modal, Notice, Plugin, PluginSettingTab, requestUrl, Setting } from 'obsidian';
 import {fromMarkdown} from 'mdast-util-from-markdown'
 
 // @ts-ignore - not sure how to build a proper typescript def yet
@@ -8,12 +7,25 @@ import * as wikiLink from 'mdast-util-wiki-link'
 import {gfm} from 'micromark-extension-gfm'
 import {gfmFromMarkdown, gfmToMarkdown} from 'mdast-util-gfm'
 
-import { Blockquote, Code, Heading, Image, InlineCode, Link, List, Node, Parent, Text } from 'mdast-util-from-markdown/lib';
+import { Blockquote, Code, Heading, Image, InlineCode, Link, List, Parent, Text, Node } from 'mdast';
 import { Literal, Table } from 'mdast';
 import * as path from 'path';
+import { CopyAsLatexPluginSettings } from './settings';
 
 export type citeCommand = "basic" | "autocite" | "parencite" | "extended"
 export type citationType = "bare" | "surrounded" | "pre" | "post" | "paren"
+
+export function markdownToLatex(text: string, settings: CopyAsLatexPluginSettings, remarkSetup: any): string {
+	if( settings.logOutput ) {console.log(text);}
+	const ast = fromMarkdown(text, remarkSetup);
+	if( settings.logOutput ) {console.log(ast);}
+	if( settings.citeCommand === "extended" ) preprocessAST(ast)
+	if( settings.logOutput ) {console.log("New AST:",ast);}
+	const result = ASTtoString(ast,settings)
+	if( settings.logOutput ) {console.log(result);}
+	return result
+}
+
 
 export interface ConversionSettings {
 	inlineDelimiter:string;
@@ -43,7 +55,7 @@ export function ASTtoString(input:Node,settings:ConversionSettings,indent:number
 		'delete': (a:Node) => {return "\\st{" + wrapper("","")(a,settings) + "}"},
 		'footnote': (a:Node) => {return "\\footnote{" + wrapper("","")(a,settings) + "}"},
 		'list' : list,
-		'listItem': (a:Node) => {return "\t".repeat(indent) + "\\item " + wrapper("","")(a,settings,indent) },
+		'listItem': (a:Node) => {return "    ".repeat(indent) + "\\item " + wrapper("","")(a,settings,indent) },
 		'heading': heading,
 		'wikiLink': internalLink,
 		'link': externalLink,
@@ -111,7 +123,7 @@ const heading = (a:Node,settings:ConversionSettings,indent:number=0) => {
 const list = (a:Node,settings:ConversionSettings,indent:number=0) => {
 	const h = a as List
 	var sec = h.ordered ? "compactenum" : "compactitem"
-	return "\t".repeat(indent) + "\\begin{" + sec + "}\n" + 
+	return "    ".repeat(indent) + "\\begin{" + sec + "}\n" + 
 		wrapper("","")(a,settings,indent+1) +
 		"    ".repeat(indent) + "\\end{" + sec + "}\n"
 }

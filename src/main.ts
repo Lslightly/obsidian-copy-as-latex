@@ -11,12 +11,12 @@ import {math} from 'micromark-extension-math'
 import {mathFromMarkdown, mathToMarkdown} from 'mdast-util-math'
 
 
-import { Code, Heading, Link, List, Node, Parent } from 'mdast-util-from-markdown/lib';
 import { Literal } from 'mdast';
-import {ASTtoString,ConversionSettings, preprocessAST,citeCommand, findAll, findCitations, citationType} from './convert'
+import {ASTtoString,ConversionSettings, preprocessAST,citeCommand, findAll, findCitations, citationType, markdownToLatex} from './convert'
 import * as path from 'path';
 import { BibtexConverter } from './bibtex';
-import CopyAsLatexSettingTab, { CopyAsLatexPluginSettings, DEFAULT_SETTINGS } from './settings';
+import CopyAsLatexSettingTab, { CopyAsLatexPluginSettings } from './settings';
+import { DEFAULT_SETTINGS } from './default';
 
 export default class CopyAsLatexPlugin extends Plugin {
 	settings: CopyAsLatexPluginSettings; 
@@ -32,7 +32,7 @@ export default class CopyAsLatexPlugin extends Plugin {
 		this.addCommand({
 			id: 'copy-as-latex',
 			name: 'Copy as Latex',
-			editorCallback: (editor, _) => this.markdownToLatex(editor)
+			editorCallback: (editor, _) => this.editorMarkdownToLatex(editor)
 		});
 		this.addCommand({
 			id: 'latex-citations',
@@ -42,24 +42,19 @@ export default class CopyAsLatexPlugin extends Plugin {
 		this.addSettingTab(new CopyAsLatexSettingTab(this.app, this));
 	}
 
-	markdownToLatex(editor:Editor) {
+	editorMarkdownToLatex(editor:Editor): boolean {
 		let text = editor.getSelection();
 		if(text.length == 0 && this.settings.copyWhole) text = editor.getRange({line:0,ch:0},{line:(editor.lastLine()+1),ch:0})
-		if( this.settings.logOutput ) {console.log(text); }
-		const ast:Node = fromMarkdown(text, this.remarkSetup);
-		if( this.settings.logOutput ) {console.log(ast);}
-		if( this.settings.citeCommand === "extended" ) preprocessAST(ast)
-		if( this.settings.logOutput ) {console.log("New AST:",ast);}
-		const result = ASTtoString(ast,this.settings)
-		if( this.settings.logOutput ) {console.log(result);}
+		const result = markdownToLatex(text, this.settings, this.remarkSetup);
 		navigator.clipboard.writeText(result)
 		return true;
 	}
 
+
 	async copyMissingCitations(editor:Editor) {
 		let text = editor.getSelection();
 		if(text.length == 0 && this.settings.copyWhole) text = editor.getRange({line:0,ch:0},{line:(editor.lastLine()+1),ch:0})
-		const ast:Node = fromMarkdown(text, this.remarkSetup);
+		const ast = fromMarkdown(text, this.remarkSetup);
 		const keysInDoc = findCitations(ast)
 		console.log("Citations in document",keysInDoc)
 		const myBibFile = this.resolveLibraryPath(this.settings.bibtexFile)

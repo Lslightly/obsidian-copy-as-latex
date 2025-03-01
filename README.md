@@ -102,6 +102,12 @@ To use it:
 
 # Development
 
+use `npm run dev` to generate `main.js` in `dist` dir.
+
+use `npm run test` to use `vitest` to test the project.
+
+`vitest` still has problem.
+
 ## Changelog
 
 ### 1.9
