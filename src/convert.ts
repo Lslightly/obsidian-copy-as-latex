@@ -96,9 +96,12 @@ const heading = (a:Node,settings:ConversionSettings,indent:number=0) => {
 	var sec = "section"
 	if( h.depth == 2 ) sec = "subsection"
 	if( h.depth == 3 ) sec = "subsubsection"
-	let header = ASTtoString((a as Parent).children[0],settings)
+	if( h.depth == 4 ) sec = "paragraph"
+	let oheader = (a as Parent).children[0]
+	let oheader_str = (oheader as Text).value
+	let header = ASTtoString(oheader, settings)
 	let is_paragraph = h.depth == 4
-	let label = `\\label{sec:${header}}\n`
+	let label = `\\label{sec:${oheader_str}}\n`
 	if (is_paragraph) {
 		return `\\${sec}{${header}}\n`+label
 	}
@@ -107,10 +110,10 @@ const heading = (a:Node,settings:ConversionSettings,indent:number=0) => {
 
 const list = (a:Node,settings:ConversionSettings,indent:number=0) => {
 	const h = a as List
-	var sec = h.ordered ? "enumerate" : "itemize"
+	var sec = h.ordered ? "compactenum" : "compactitem"
 	return "\t".repeat(indent) + "\\begin{" + sec + "}\n" + 
 		wrapper("","")(a,settings,indent+1) +
-		"\t".repeat(indent) + "\\end{" + sec + "}\n"
+		"    ".repeat(indent) + "\\end{" + sec + "}\n"
 }
 const internalLink = (a:Node,settings:ConversionSettings,indent:number=0) => {
 	const h = a as wikiLink
@@ -177,8 +180,12 @@ const externalLink = (a:Node,settings:ConversionSettings,indent:number=0) => {
 	} else if (url.startsWith("#")) {
 		if (url === "#code") {
 			return `${escapeLatex(title)}\\autoref{code:${title}}`
-		} else if (url === "#fig") {
+		}
+		if (url === "#fig") {
 			return `${escapeLatex(title)}\\autoref{fig:${title}}`
+		}
+		if (url === "#cmd") {	//	[cmdname{arg0}{arg1}](#cmd) => \cmdname{arg0}{arg1}
+			return `\\${title} `
 		}
 		let ref = decodeURI(url.substring(1))
 		let header = `${escapeLatex(title)}\\autoref{sec:${escapeLatex(ref)}}`
@@ -208,24 +215,32 @@ ${cd.value}
 \\end{minted}
 `
 	}
+	let code = cd.value
+	let meta = cd.meta
+	if (meta && meta.contains("escape")) {
+		code = escapeLatex(code)
+		meta = meta.replace("escape", "")
+	}
 	if (cd.lang == undefined) {
 		return `\\begin{lstlisting}
-${cd.value}
+${code}
 \\end{lstlisting}
 `
 	} else {
 		let caption = ""
-		if (cd.meta != undefined && cd.meta != null) {
-			caption = cd.meta
-		}
-		let label = ""
-		if (caption !== "") {
-			label = `code:${caption}`
-		}
-	return `\\begin{lstlisting}[language=${cd.lang},caption=${escapeLatex(caption)},label=${label}]
-${cd.value}
+		if (meta) {
+			caption = meta
+			let label = ""
+			if (caption !== "") {
+				label = `code:${caption}`
+			}
+return `\\begin{lstlisting}[language=${cd.lang},caption=${escapeLatex(caption)},label=${label}]
+${code}
 \\end{lstlisting}
 `
+		} else {
+			return `\\begin{lstlisting}[language=${cd.lang}]\n${code}\n\\end{lstlisting}`
+		}
 	}
 }
 
@@ -252,7 +267,12 @@ const inlineMath = (a:Node,settings:ConversionSettings,indent:number=0) => {
 
 const displayMath = (a:Node,settings:ConversionSettings,indent:number=0) => {
 	const v = (a as Literal).value
-	return `$$\n${v}\n$$`
+	let mathcode = v
+	if (!mathcode.startsWith(`\\begin{align*}`)) {
+		mathcode = `\\begin{align*}\n${mathcode}\n\\end{align*}`
+	}
+	let result = `\\begin{small}\n${mathcode}\n\\end{small}`
+	return result
 }
 
 /**
