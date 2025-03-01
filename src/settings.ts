@@ -4,6 +4,21 @@ import { App, PluginSettingTab, Setting, TextComponent } from "obsidian";
 import { citationType, citeCommand, ConversionSettings } from "./convert";
 import CopyAsLatexPlugin from "./main";
 
+// @ts-ignore - not sure how to build a proper typescript def yet
+import { syntax } from 'micromark-extension-wiki-link'
+import {gfm} from 'micromark-extension-gfm'
+import {math} from 'micromark-extension-math'
+// @ts-ignore - not sure how to build a proper typescript def yet
+import * as wikiLink from 'mdast-util-wiki-link'
+import {gfmFromMarkdown} from 'mdast-util-gfm'
+import {mathFromMarkdown} from 'mdast-util-math'
+
+
+export const DEFAULT_REMARK_SETUP = {
+    extensions: [syntax(),gfm(),math()],
+    mdastExtensions: [wikiLink.fromMarkdown(),gfmFromMarkdown(),mathFromMarkdown()]
+}
+
 export interface CopyAsLatexPluginSettings extends ConversionSettings {
 	logOutput: boolean;
 	copyWhole: boolean;

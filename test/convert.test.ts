@@ -2,7 +2,8 @@ import { expect, test, describe } from 'vitest';
 
 import { markdownToLatex } from 'src/convert';
 import { CopyAsLatexPluginSettings } from 'src/settings';
-import { DEFAULT_REMARK_SETUP, DEFAULT_SETTINGS } from 'src/default';
+import { DEFAULT_SETTINGS } from 'src/default';
+import { DEFAULT_REMARK_SETUP } from 'src/settings';
 
 describe('convert', () => {
     let settings: CopyAsLatexPluginSettings = DEFAULT_SETTINGS;
