@@ -104,6 +104,8 @@ To use it:
 
 use `npm run dev` to generate `main.js` in `dist` dir.
 
+use `npm run build` to build `main.js`.
+
 use `npm run test` to use `vitest` to test the project.
 
 `vitest` still has problem.
