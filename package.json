@@ -22,12 +22,12 @@
     "vitest": "^3.0.7"
   },
   "dependencies": {
-    "obsidian": "^1.8.7",
+    "obsidian": "^1.10.3",
     "@types/mdast": "^4.0.4",
     "mdast-util-from-markdown": "^2.0.2",
-    "mdast-util-gfm": "^2.0.0",
-    "mdast-util-math": "^2.0.0",
-    "mdast-util-wiki-link": "^0.0.2",
+    "mdast-util-gfm": "^3.1.0",
+    "mdast-util-math": "^2.0.2",
+    "mdast-util-wiki-link": "^0.1.2",
     "micromark-extension-gfm": "^2.0.0",
     "micromark-extension-math": "^2.0.2",
     "micromark-extension-wiki-link": "^0.0.4"

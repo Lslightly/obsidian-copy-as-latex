@@ -1,5 +1,5 @@
 import { App, Editor, Modal, Notice, Plugin, PluginSettingTab, Setting, EditorPosition, FileSystemAdapter, TextComponent } from 'obsidian';
-import {fromMarkdown} from 'mdast-util-from-markdown'
+import {fromMarkdown, Options} from 'mdast-util-from-markdown'
 
 // @ts-ignore - not sure how to build a proper typescript def yet
 import { syntax } from 'micromark-extension-wiki-link'
@@ -21,7 +21,7 @@ import { DEFAULT_SETTINGS } from './default';
 export default class CopyAsLatexPlugin extends Plugin {
 	settings: CopyAsLatexPluginSettings; 
 	bibtex: BibtexConverter = new BibtexConverter()
-	remarkSetup = {
+	remarkSetup: Options = {
 		extensions: [syntax(),gfm(),math()],
 		mdastExtensions: [wikiLink.fromMarkdown(),gfmFromMarkdown(),mathFromMarkdown()]
 	}
