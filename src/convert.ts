@@ -127,8 +127,14 @@ const list = (a:Node,settings:ConversionSettings,indent:number=0) => {
 		wrapper("","")(a,settings,indent+1) +
 		"    ".repeat(indent) + "\\end{" + sec + "}\n"
 }
+
+interface WikiLink extends Parent {
+	type: "wikiLink",
+	value: string, // the referenced string
+}
+
 const internalLink = (a:Node,settings:ConversionSettings,indent:number=0) => {
-	const h = a as wikiLink
+	const h = a as WikiLink
 	const url:string = h.value
 	if(url.startsWith("@") ) { 
 		if( settings.citeCommand === "extended" ) {
@@ -145,7 +151,7 @@ const internalLink = (a:Node,settings:ConversionSettings,indent:number=0) => {
 }
 
 //For internal links that start with '@'
-const extendedCitation = (h:wikiLink,settings:ConversionSettings) =>  {
+const extendedCitation = (h:WikiLink,settings:ConversionSettings) =>  {
 	const pre = "pre" in h ? (h as any).pre : null
 	const post = "post" in h ? (h as any).post : null
 	const id = h.value.substring(1)
